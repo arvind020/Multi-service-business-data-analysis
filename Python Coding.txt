@@ -1,0 +1,114 @@
+1. Number of Customers in each price range
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load dataset
+file_path = r"C:/Users/arvin/Downloads/DataAnalyst_Assesment_Dataset.xlsx"
+df = pd.read_excel(file_path)
+
+# Ensure relevant columns exist
+if 'Customer Name' in df.columns and 'Price' in df.columns:
+    # Group by Customer Name and sum the Price
+    customer_price = df.groupby('Customer Name')['Price'].sum().reset_index()
+    
+    # Define bin size as 14.98 and create bins as multiples of 14.98
+    step = 14.98
+    max_price = customer_price["Price"].max()
+    # Create bins from 0 up to max_price with a step of 14.98 (add one extra step to cover max value)
+    bins = np.arange(0, max_price + step, step)
+    
+    # Create bin labels for each interval
+    labels = [f"{round(bins[i],2)}-{round(bins[i+1],2)}" for i in range(len(bins)-1)]
+    
+    # Create a new column for price bins
+    customer_price["Price Bin"] = pd.cut(customer_price["Price"], bins=bins, labels=labels, include_lowest=True)
+
+    # Count customers in each bin
+    price_bin_counts = customer_price["Price Bin"].value_counts().sort_index()
+
+    # Plot Bar Chart
+    plt.figure(figsize=(12, 6))
+    ax = sns.barplot(x=price_bin_counts.index, y=price_bin_counts.values, palette='coolwarm')
+    
+    plt.xlabel("Price Range (Bins)")
+    plt.ylabel("Number of Customers")
+    plt.title("Number of Customers in Each Price Range (Bin Size = 14.98)")
+    plt.xticks(rotation=45)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    
+    # Add data labels on top of each bar
+    for p in ax.patches:
+        height = p.get_height()
+        ax.annotate(f'{int(height)}', 
+                    (p.get_x() + p.get_width() / 2., height), 
+                    ha='center', va='bottom', 
+                    fontsize=10, color='black', xytext=(0, 5),
+                    textcoords='offset points')
+
+    # Show Plot
+    plt.show()
+else:
+    print("Error: Columns 'Customer Name' or 'Price' not found in the dataset.")
+
+
+
+2.Facility Bookings Heatmap
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load dataset from the given path
+dataset = pd.read_excel(r"C:/Users/arvin/Downloads/DataAnalyst_Assesment_Dataset.xlsx")
+
+# Pivot table for heatmap (Ensure column names are correct)
+heatmap_data = dataset.pivot_table(index="Facility", columns="Time Slot", values="Booking ID", aggfunc="count")
+
+# Plot heatmap
+plt.figure(figsize=(10,6))
+sns.heatmap(heatmap_data, cmap="coolwarm", annot=True, fmt=".0f")
+
+# Set titles and labels
+plt.title("Facility Bookings Heatmap")
+plt.xlabel("Time Slot")
+plt.ylabel("Facility")
+
+# Display the plot (Power BI will render it)
+plt.show()
+
+
+
+
+
+3.Price Distribution across Booking Types
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load dataset from the given path
+dataset = pd.read_excel(r"C:/Users/arvin/Downloads/DataAnalyst_Assesment_Dataset.xlsx")
+
+# Create a figure with adjusted size
+plt.figure(figsize=(12, 6))  # Increased width for better spacing
+
+# Boxplot of Price distribution across Booking Types
+sns.boxplot(x="Booking Type", y="Price", data=dataset)
+
+# Rotate x-axis labels for better readability
+plt.xticks(rotation=30, ha="right")  # Rotated labels with right alignment
+
+# Set titles and labels
+plt.title("Price Distribution Across Booking Types", fontsize=14, fontweight='bold')
+plt.xlabel("Booking Type", fontsize=12)
+plt.ylabel("Price", fontsize=12)
+
+# Adjust layout to prevent cut-off labels
+plt.tight_layout()
+
+# Display the plot (Power BI will render it)
+plt.show()
+
